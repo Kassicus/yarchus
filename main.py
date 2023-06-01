@@ -2,6 +2,7 @@ from termcolor import *
 
 class Item():
     def __init__(self, name: str, description: str):
+        self.raw_name = name
         self.name = colored(name, "white", attrs=["bold"])
         self.description = description    
 
@@ -30,6 +31,11 @@ class Player():
         for item in self.inventory:
             print("    " + item.name)
 
+    def describe_item(self, name: str):
+        for item in self.inventory:
+            if item.raw_name == name:
+                print(f"    {item.name}, {item.description}")
+
 class Game():
     def __init__(self):
 
@@ -54,6 +60,7 @@ class Game():
             "exit": ["ends the program", self.exit],
             "help": ["displays this help prompt", self.help],
             "inv": ["lists the items in the players inventory", self.player.list_inventory],
+            "des": ["describes the item entered", self.player.describe_item]
         }
 
         self.player.add_to_inventory(self.items["sock"])
@@ -62,11 +69,19 @@ class Game():
 
     def start(self):
         while self.running:
-            c = str(input(self.prompt))
-            if c in self.commands:
-                self.commands[c][1]()
+            inp = str(input(self.prompt))
+            com = inp.split()
+            
+            if len(com) > 1:
+                if com[0] in self.commands:
+                    self.commands[com[0]][1](com[1])
+                else:
+                    cprint("  ! invalid command \n", "red", attrs=["bold"])
             else:
-                cprint("  ! invalid command \n", "red", attrs=["bold"])
+                if com[0] in self.commands:
+                    self.commands[com[0]][1]()
+                else:
+                    cprint("  ! invalid command \n", "red", attrs=["bold"])
 
     def exit(self):
         self.running = False
@@ -76,6 +91,9 @@ class Game():
         print("    ---------------------")
         for command in self.commands:
             print(f"    {command} | {self.commands[command][0]}")
+
+    def copy_input_test(self, second_input: str):
+        print(second_input)
 
 if __name__ == "__main__":
     game = Game()
