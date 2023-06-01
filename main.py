@@ -57,10 +57,10 @@ class Game():
         }
 
         self.commands = {
-            "exit": ["ends the program", self.exit],
-            "help": ["displays this help prompt", self.help],
-            "inv": ["lists the items in the players inventory", self.player.list_inventory],
-            "des": ["describes the item entered", self.player.describe_item]
+            "exit": ["no args", "ends the program", self.exit],
+            "help": ["no args", "displays this help prompt", self.help],
+            "inv": ["no args", "lists the items in the players inventory", self.player.list_inventory],
+            "des": ["arg: item name (case sensitive)", "describes the item entered", self.player.describe_item]
         }
 
         self.player.add_to_inventory(self.items["sock"])
@@ -72,14 +72,16 @@ class Game():
             inp = str(input(self.prompt))
             com = inp.split()
             
+            # FIXME: this will break if we feed a second input to a command not expecting it
+
             if len(com) > 1:
                 if com[0] in self.commands:
-                    self.commands[com[0]][1](com[1])
+                    self.commands[com[0]][2](com[1])
                 else:
                     cprint("  ! invalid command \n", "red", attrs=["bold"])
             else:
                 if com[0] in self.commands:
-                    self.commands[com[0]][1]()
+                    self.commands[com[0]][2]()
                 else:
                     cprint("  ! invalid command \n", "red", attrs=["bold"])
 
@@ -87,10 +89,10 @@ class Game():
         self.running = False
 
     def help(self):
-        print("    Command | Description")
-        print("    ---------------------")
+        print("    Command | Arguments | Description")
+        print("    ---------------------------------")
         for command in self.commands:
-            print(f"    {command} | {self.commands[command][0]}")
+            print(f"    {command} | {self.commands[command][0]} | {self.commands[command][1]}")
 
     def copy_input_test(self, second_input: str):
         print(second_input)
