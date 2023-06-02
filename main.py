@@ -1,5 +1,7 @@
 from termcolor import *
 
+LEADER = "    "
+
 class Item():
     def __init__(self, name: str, description: str):
         self.raw_name = name
@@ -10,6 +12,9 @@ class Consumable(Item):
     def __init__(self, name: str, description: str):
         super().__init__(name, description)
         self.name = colored(name, "blue", attrs=["bold"])
+
+    def consume(self):
+        print("consumed!")
 
 class Weapon(Item):
     def __init__(self, name: str, description: str, w_type: str, damage: int, durability: int):
@@ -24,17 +29,26 @@ class Player():
     def __init__(self):
         self.inventory = []
 
+        self.health = 10
+
     def add_to_inventory(self, item: Item):
         self.inventory.append(item)
 
     def list_inventory(self):
         for item in self.inventory:
-            print("    " + item.name)
+            print(LEADER + item.name)
 
     def describe_item(self, name: str):
         for item in self.inventory:
             if item.raw_name == name:
-                print(f"    {item.name}, {item.description}")
+                print(LEADER + f"{item.name}, {item.description}")
+
+    def consume_item(self, name: str):
+        for item in self.inventory:
+            if item.raw_name == name:
+                if type(item).__name__ == "Consumable":
+                    item.consume()
+                    self.inventory.remove(item)
 
 class Game():
     def __init__(self):
@@ -60,7 +74,8 @@ class Game():
             "exit": ["no args", "ends the program", self.exit],
             "help": ["no args", "displays this help prompt", self.help],
             "inv": ["no args", "lists the items in the players inventory", self.player.list_inventory],
-            "des": ["arg: item name (case sensitive)", "describes the item entered", self.player.describe_item]
+            "des": ["arg: item name (case sensitive)", "describes the item entered", self.player.describe_item],
+            "cons": ["arg: item name (case sensitive)", "consumes the item entered", self.player.consume_item]
         }
 
         self.player.add_to_inventory(self.items["sock"])
@@ -69,6 +84,7 @@ class Game():
 
     def start(self):
         while self.running:
+            print("\n")
             inp = str(input(self.prompt))
             com = inp.split()
             
@@ -89,10 +105,10 @@ class Game():
         self.running = False
 
     def help(self):
-        print("    Command | Arguments | Description")
-        print("    ---------------------------------")
+        print(LEADER + "Command | Arguments | Description")
+        print(LEADER + "---------------------------------")
         for command in self.commands:
-            print(f"    {command} | {self.commands[command][0]} | {self.commands[command][1]}")
+            print(LEADER + f"{command} | {self.commands[command][0]} | {self.commands[command][1]}")
 
     def copy_input_test(self, second_input: str):
         print(second_input)
