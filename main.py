@@ -1,6 +1,7 @@
 from termcolor import *
 
 LEADER = "    "
+DEBUG = colored("    DEBUG: ", "yellow")
 
 class Item():
     def __init__(self, name: str, description: str):
@@ -14,7 +15,7 @@ class Consumable(Item):
         self.name = colored(name, "blue", attrs=["bold"])
 
     def consume(self):
-        print("consumed!")
+        print(DEBUG + "consumed!")
 
 class Weapon(Item):
     def __init__(self, name: str, description: str, w_type: str, damage: int, durability: int):
@@ -49,6 +50,8 @@ class Player():
                 if type(item).__name__ == "Consumable":
                     item.consume()
                     self.inventory.remove(item)
+                else:
+                    print(LEADER + colored("item is not consumable!", "red", attrs=["underline"]))
 
 class Game():
     def __init__(self):
