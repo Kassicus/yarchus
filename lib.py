@@ -7,9 +7,10 @@ pygame.font.init()
 
 class Fonts():
     def __init__(self):
-        self.bold = pygame.font.SysFont("Courier", 20, bold = True)
-        self.italic = pygame.font.SysFont("Courier", 20, italic = True)
-        self.bold_italic = pygame.font.SysFont("Courier", 20, bold = True, italic = True)
+        self.regular = pygame.font.SysFont("Courier", 16)
+        self.bold = pygame.font.SysFont("Courier", 16, bold = True)
+        self.italic = pygame.font.SysFont("Courier", 16, italic = True)
+        self.bold_italic = pygame.font.SysFont("Courier", 16, bold = True, italic = True)
 
 class Colors():
     def __init__(self):

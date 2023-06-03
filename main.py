@@ -1,6 +1,7 @@
 import pygame
 
 import lib
+import command
 
 pygame.init()
 
@@ -12,6 +13,8 @@ class Game():
         self.running = True
         self.clock = pygame.time.Clock()
         lib.events = pygame.event.get()
+
+        self.command_prompt = command.CommandPrompt(100, 600, 600, 30)
 
     def start(self):
         while self.running:
@@ -29,7 +32,10 @@ class Game():
     def draw(self):
         self.screen.fill(lib.color.black)
 
+        self.command_prompt.draw_commands(self.screen)
+
     def update(self):
+        self.command_prompt.update_commands()
 
         pygame.display.update()
         lib.delta_time = self.clock.tick(lib.framerate) / 1000
