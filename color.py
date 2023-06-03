@@ -57,7 +57,7 @@ class Game():
         offset = 100
         
         for word in self.rendered_words:
-            surface.blit(word, (offset, 100))
+            surface.blit(word, (offset, 700))
             offset += word.get_width() + 10
 
     def draw(self):
