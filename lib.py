@@ -21,6 +21,7 @@ class Colors():
         self.weapon = pygame.Color(255, 0, 0)
         self.consumable = pygame.Color(0, 255, 255)
         self.debug = pygame.Color(255, 255, 0)
+        self.field = pygame.Color(60, 60, 60)
 
 font = Fonts()
 color = Colors()

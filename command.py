@@ -2,6 +2,37 @@ import pygame
 
 import lib
 
+class FeedbackPrompt():
+    def __init__(self, x: int, y: int, width: int, height: int):
+        
+        self.pos = pygame.math.Vector2(x, y)
+        self.size = pygame.math.Vector2(width, height)
+
+        self.text = ""
+        self.feedback = self.text.split()
+
+        self.rendered_feedback = []
+
+    def render_feedback(self):
+        self.rendered_feedback = []
+
+        for word in self.feedback:
+            rendered_word = lib.font.regular.render(word, True, lib.color.text)
+            self.rendered_feedback.append(rendered_word)
+
+    def draw_feedback(self, surface: pygame.Surface):
+        offset = self.pos.x + 10
+
+        pygame.draw.rect(surface, lib.color.field, (self.pos.x, self.pos.y, self.size.x, self.size.y))
+
+        for word in self.rendered_feedback:
+            surface.blit(word, (offset, self.pos.y + 10))
+            offset += word.get_width() + 10
+
+    def update_feedback(self):
+        self.feedback = self.text.split()
+        self.render_feedback()
+
 class CommandPrompt():
     def __init__(self, x: int, y: int, width: int, height: int):
 
@@ -67,7 +98,9 @@ class CommandPrompt():
             self.rendered_commands.append(rendered_command)
 
     def draw_commands(self, surface: pygame.Surface):
-        offset = 10
+        offset = self.pos.x + 10
+
+        pygame.draw.rect(surface, lib.color.field, (self.pos.x, self.pos.y, self.size.x, self.size.y))
 
         for command in self.rendered_commands:
             surface.blit(command, (offset, self.pos.y + 10))
