@@ -2,6 +2,7 @@ import pygame
 
 import lib
 import command
+import player
 
 pygame.init()
 
@@ -17,6 +18,8 @@ class Game():
         self.feedback_prompt = command.FeedbackPrompt(50, 50, 700, 500)
         self.command_prompt = command.CommandPrompt(50, 650, 700, 40, self.feedback_prompt)
         
+        lib.player = player.Player()
+
     def start(self):
         while self.running:
             self.events()

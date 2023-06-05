@@ -71,7 +71,7 @@ class CommandPrompt():
         self.commands_list = {
             "exit": ["no args", "ends the program"],
             "help": ["no args", "displays this prompt"],
-            "inv": ["no args", "lists the items in the players inventory"],
+            "inv": ["no args", "lists the items in the players inventory", lib.player.show_inventory],
             "des": ["arg: item name (case sensitive)", "describes the item entered"],
             "cons": ["arg: item name (case sensitive)", "consumes the item entered"],
             "test": ["no args", "testing the command printing thingy", self.test],

@@ -41,3 +41,5 @@ color = Colors()
 events = None
 delta_time = 0
 framerate = 120
+
+player = None
