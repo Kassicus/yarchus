@@ -2,44 +2,67 @@ import pygame
 
 import lib
 
+class FeedbackLine():
+    def __init__(self, text: str):
+        self.text = text
+
+        self.words = self.text.split()
+
+        self.line = []
+
+        self.color_words()
+
+    def color_words(self):
+        for word in self.words:
+            if word in lib.item_keywords:
+                c_word = lib.font.bold.render(word, True, lib.color.item)
+            elif word in lib.consumable_keywords:
+                c_word = lib.font.bold.render(word, True, lib.color.consumable)
+            elif word in lib.weapon_keywords:
+                c_word = lib.font.bold.render(word, True, lib.color.weapon)
+            else:
+                c_word = lib.font.regular.render(word, True, lib.color.text)
+
+            self.line.append(c_word)
+
 class FeedbackPrompt():
     def __init__(self, x: int, y: int, width: int, height: int):
         
         self.pos = pygame.math.Vector2(x, y)
         self.size = pygame.math.Vector2(width, height)
 
-        self.text = ""
-        self.feedback = self.text.split()
+        self.feedback_lines = []
 
-        self.rendered_feedback = []
-
-    def render_feedback(self):
-        self.rendered_feedback = []
-
-        for word in self.feedback:
-            rendered_word = lib.font.regular.render(word, True, lib.color.text)
-            self.rendered_feedback.append(rendered_word)
+    def reset_prompt(self):
+        self.feedback_lines = []
 
     def draw_feedback(self, surface: pygame.Surface):
-        offset = self.pos.x + 10
+        vert_offset = 10 + self.pos.x
+        horiz_offset = 10 + self.pos.y
 
         pygame.draw.rect(surface, lib.color.field, (self.pos.x, self.pos.y, self.size.x, self.size.y))
 
-        for word in self.rendered_feedback:
-            surface.blit(word, (offset, self.pos.y + 10))
-            offset += word.get_width() + 10
+        for line in self.feedback_lines:
+            horiz_offset = 10 + self.pos.x
+
+            for word in line.line:
+                surface.blit(word, (horiz_offset, vert_offset))
+                horiz_offset += word.get_width() + 10
+            
+            vert_offset += 30
 
     def update_feedback(self):
-        self.feedback = self.text.split()
-        self.render_feedback()
+       pass
 
 class CommandPrompt():
-    def __init__(self, x: int, y: int, width: int, height: int):
+    def __init__(self, x: int, y: int, width: int, height: int, feedback_prompt: FeedbackPrompt):
 
         self.pos = pygame.math.Vector2(x, y)
         self.size = pygame.math.Vector2(width, height)
 
-        self.active = True
+        self.active = False
+
+        self.feedback_prompt = feedback_prompt
 
         self.text = ""
         self.commands = self.text.split()
@@ -50,8 +73,17 @@ class CommandPrompt():
             "help": ["no args", "displays this prompt"],
             "inv": ["no args", "lists the items in the players inventory"],
             "des": ["arg: item name (case sensitive)", "describes the item entered"],
-            "cons": ["arg: item name (case sensitive)", "consumes the item entered"]
+            "cons": ["arg: item name (case sensitive)", "consumes the item entered"],
+            "test": ["no args", "testing the command printing thingy", self.test],
+            "clear": ["no args", "clears the feedback window", self.clear_feedback]
         }
+
+    def test(self):
+        line = FeedbackLine("this will test item consumable and weapon highligting")
+        self.feedback_prompt.feedback_lines.append(line)
+
+    def clear_feedback(self):
+        self.feedback_prompt.reset_prompt()
 
     def check_active(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -60,6 +92,12 @@ class CommandPrompt():
             if self.pos.y < mouse_y < self.pos.y + self.size.y:
                 if pygame.mouse.get_pressed()[0]:
                     self.active = True
+            else:
+                if pygame.mouse.get_pressed()[0]:
+                    self.active = False
+        else:
+            if pygame.mouse.get_pressed()[0]:
+                self.active = False
 
     def text_input(self):
         for event in lib.events:
@@ -74,14 +112,16 @@ class CommandPrompt():
     def process_command(self):
         if len(self.commands) > 1:
             if self.commands[0] in self.commands_list:
-                print("this was a command with a argument")
+                self.commands_list[self.commands[0]][2](self.commands[1])
             else:
-                print("invalid command")
+                line = FeedbackLine("invalid command")
+                self.feedback_prompt.feedback_lines.append(line)
         else:
             if self.commands[0] in self.commands_list:
-                print("this was a command")
+                self.commands_list[self.commands[0]][2]()
             else:
-                print("invalid command")
+                line = FeedbackLine("invalid command")
+                self.feedback_prompt.feedback_lines.append(line)
         
         self.text = ""
 
@@ -101,6 +141,9 @@ class CommandPrompt():
         offset = self.pos.x + 10
 
         pygame.draw.rect(surface, lib.color.field, (self.pos.x, self.pos.y, self.size.x, self.size.y))
+
+        if self.active:
+            pygame.draw.rect(surface, lib.color.text, (self.pos.x, self.pos.y, self.size.x, self.size.y), 1)
 
         for command in self.rendered_commands:
             surface.blit(command, (offset, self.pos.y + 10))

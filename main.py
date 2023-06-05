@@ -14,9 +14,9 @@ class Game():
         self.clock = pygame.time.Clock()
         lib.events = pygame.event.get()
 
-        self.command_prompt = command.CommandPrompt(50, 650, 700, 40)
         self.feedback_prompt = command.FeedbackPrompt(50, 50, 700, 500)
-
+        self.command_prompt = command.CommandPrompt(50, 650, 700, 40, self.feedback_prompt)
+        
     def start(self):
         while self.running:
             self.events()
@@ -33,12 +33,12 @@ class Game():
     def draw(self):
         self.screen.fill(lib.color.black)
 
-        self.command_prompt.draw_commands(self.screen)
         self.feedback_prompt.draw_feedback(self.screen)
+        self.command_prompt.draw_commands(self.screen)
 
     def update(self):
-        self.command_prompt.update_commands()
         self.feedback_prompt.update_feedback()
+        self.command_prompt.update_commands()
 
         pygame.display.update()
         lib.delta_time = self.clock.tick(lib.framerate) / 1000

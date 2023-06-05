@@ -22,6 +22,18 @@ class Colors():
         self.consumable = pygame.Color(0, 255, 255)
         self.debug = pygame.Color(255, 255, 0)
         self.field = pygame.Color(60, 60, 60)
+    
+item_keywords = [
+    "item"
+]
+    
+consumable_keywords = [
+    "consumable"
+]
+    
+weapon_keywords = [
+    "weapon"
+]
 
 font = Fonts()
 color = Colors()
