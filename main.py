@@ -11,32 +11,36 @@ SCREEN_HEIGHT = 800
 
 C_BLACK = pygame.Color(0, 0, 0)
 C_TEXT = pygame.Color(255, 255, 255)
-C_COMMAND = pygame.Color(0, 255, 0)
-C_ITEM = pygame.Color(255, 255, 255)
-C_WEAPON = pygame.Color(255, 0, 0)
-C_CONSUMABLE = pygame.Color(0, 255, 255)
-C_DEBUG = pygame.Color(255, 255, 0)
+C_COMMAND = pygame.Color(210, 179, 255)
+C_ITEM = pygame.Color(228, 255, 179)
+C_WEAPON = pygame.Color(255, 179, 179)
+C_CONSUMABLE = pygame.Color(179, 232, 255)
+C_DEBUG = pygame.Color(255, 240, 179)
 C_FIELD = pygame.Color(60, 60, 60)
 
-F_REGULAR = pygame.font.SysFont("Courier", 16)
-F_BOLD = pygame.font.SysFont("Courier", 16, bold = True)
-F_ITALIC = pygame.font.SysFont("Courier", 16, italic = True)
-F_BOLD_ITALIC = pygame.font.SysFont("Courier", 16, bold = True, italic = True)
+F_REGULAR = pygame.font.Font("assets/fonts/Regular.ttf", 14)
+F_BOLD = pygame.font.Font("assets/fonts/Bold.ttf", 14)
+F_ITALIC = pygame.font.Font("assets/fonts/Italic.ttf", 14)
+F_BOLD_ITALIC = pygame.font.Font("assets/fonts/BoldItalic.ttf", 14)
 
 #################
 # KEYWORD LISTS #
 #################
 
 item_keywords = [
-    "item"
+    
 ]
 
 consumable_keywords = [
-    "consumable"
+    
 ]
 
 weapon_keywords = [
-    "weapon"
+    
+]
+    
+dev_keywords = [
+    "DEBUG:"
 ]
     
 ####################
@@ -59,6 +63,8 @@ class FeedbackLine():
                 p_word = F_BOLD.render(word, True, C_CONSUMABLE)
             elif word in weapon_keywords:
                 p_word = F_BOLD.render(word, True, C_WEAPON)
+            elif word in dev_keywords:
+                p_word = F_BOLD.render(word, True, C_DEBUG)
             else:
                 p_word = F_REGULAR.render(word, True, C_TEXT)
 
@@ -85,7 +91,7 @@ class FeedbackPrompt():
 
             for word in line.line:
                 game.screen.blit(word, (horizontal_offset, vertical_offset))
-                horizontal_offset += word.get_width() + 10
+                horizontal_offset += word.get_width() + 8
 
             vertical_offset += 30
 
@@ -135,7 +141,7 @@ class CommandPrompt():
 
         for command in self.commands:
             if command in game.commands_list:
-                rendered_command = F_BOLD.render(command, True, C_COMMAND)
+                rendered_command = F_BOLD_ITALIC.render(command, True, C_COMMAND)
             else:
                 rendered_command = F_REGULAR.render(command, True, C_TEXT)
 
@@ -150,8 +156,8 @@ class CommandPrompt():
             pygame.draw.rect(game.screen, C_TEXT, (self.pos.x, self.pos.y, self.size.x, self.size.y), 1)
 
         for command in self.rendered_commands:
-            game.screen.blit(command, (offset, 10 + self.pos.y))
-            offset += command.get_width() + 10
+            game.screen.blit(command, (offset, 10 + self.pos.y + 6))
+            offset += command.get_width() + 8
 
     def update_commands(self):
         self.check_active()
@@ -180,6 +186,43 @@ class Weapon(Item):
         self.type = w_type
         self.damage = damage
         self.durability = durability
+
+#########
+# ITEMS #
+#########
+
+i_sock = Item("Sock", "A Random Sock")
+
+c_milk = Consumable("Milk", "Some questionable bottled dairy")
+
+w_knife = Weapon("Knife", "A rusty butterknife", "melee", 3, 65)
+w_wrench = Weapon("Wrench", "A shiny cresent wrench", "melee", 1, 100)
+
+###################
+# ITEM CONTAINERS #
+###################
+
+items_container = [
+    i_sock
+]
+    
+consumables_container = [
+    c_milk
+]
+    
+weapons_container = [
+    w_knife,
+    w_wrench
+]
+
+for item in items_container:
+    item_keywords.append(str(item.name))
+
+for consumable in consumables_container:
+    consumable_keywords.append(str(consumable.name))
+
+for weapon in weapons_container:
+    weapon_keywords.append(str(weapon.name))
     
 ################
 # PLAYER CLASS #
@@ -192,6 +235,11 @@ class Player():
 
     def add_to_inventory(self, item: Item):
         self.inventory.append(item)
+
+    def list_inventory(self):
+        for item in self.inventory:
+            line = FeedbackLine(item.name)
+            game.feedback_prompt.feedback_lines.append(line)
 
 ###################
 # MAIN GAME CLASS #
@@ -207,13 +255,18 @@ class Game():
         self.delta_time = 0
         self.events = pygame.event.get()
 
-        self.commands_list = {
-            "test": ["no args", "testing the feedback prompt", self.command_test],
-            "clear": ["no args", "clears the feedback prompt", self.command_clear]
-        }
+        self.player = Player()
 
         self.feedback_prompt = FeedbackPrompt(50, 50, 700, 500)
         self.command_prompt = CommandPrompt(50, 600, 700, 50)
+
+        self.commands_list = {
+            "admin_add": ["item: Item", "adds the entered item to the player inventory", self.command_admin_add],
+            "admin_list": ["n/a", "lists all items in the game", self.command_admin_list],
+            "help": ["n/a", "displays this prompt", self.command_help],
+            "clear": ["n/a", "clears the feedback prompt", self.feedback_prompt.reset_prompt],
+            "inv": ["n/a", "lists the players inventory", self.player.list_inventory]
+        }
 
     def start(self):
         while self.running:
@@ -237,12 +290,56 @@ class Game():
                     else:
                         self.command_prompt.text += event.unicode
 
-    def command_test(self):
-        line = FeedbackLine("This will test item consumable and weapon highlighting")
+    def command_help(self):
+        header_line = FeedbackLine("Command | Arguments | Description")
+        self.feedback_prompt.feedback_lines.append(header_line)
+
+        for command in self.commands_list:
+            line = FeedbackLine(f"{command} | {self.commands_list[command][0]} | {self.commands_list[command][1]}")
+            self.feedback_prompt.feedback_lines.append(line)
+
+
+    def command_admin_add(self, keyword: str):
+        added_item = None
+
+        for item in items_container:
+            if item.name == keyword:
+                added_item = item
+
+        for consumable in consumables_container:
+            if consumable.name == keyword:
+                added_item = consumable
+
+        for weapon in weapons_container:
+            if weapon.name == keyword:
+                added_item = weapon
+
+        self.player.add_to_inventory(added_item)
+
+        line = FeedbackLine(f"DEBUG: Added {added_item.name} to player inventory")
         self.feedback_prompt.feedback_lines.append(line)
-    
-    def command_clear(self):
-        self.feedback_prompt.reset_prompt()
+
+    def command_admin_list(self):
+        header_line = FeedbackLine("Items: (name, description)")
+        self.feedback_prompt.feedback_lines.append(header_line)
+
+        for item in items_container:
+            line = FeedbackLine(f"{item.name} , {item.description}")
+            self.feedback_prompt.feedback_lines.append(line)
+
+        header_line = FeedbackLine("Consumables: (name, description)")
+        self.feedback_prompt.feedback_lines.append(header_line)
+        
+        for consumable in consumables_container:
+            line = FeedbackLine(f"{consumable.name} , {consumable.description}")
+            self.feedback_prompt.feedback_lines.append(line)
+
+        header_line = FeedbackLine("Weapons: (name, description, type, damage)")
+        self.feedback_prompt.feedback_lines.append(header_line)
+        
+        for weapon in weapons_container:
+            line = FeedbackLine(f"{weapon.name} , {weapon.description} , {weapon.type} , {weapon.damage}")
+            self.feedback_prompt.feedback_lines.append(line)
 
     def draw(self):
         self.screen.fill(C_BLACK)
