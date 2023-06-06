@@ -55,14 +55,12 @@ class FeedbackPrompt():
        pass
 
 class CommandPrompt():
-    def __init__(self, x: int, y: int, width: int, height: int, feedback_prompt: FeedbackPrompt):
+    def __init__(self, x: int, y: int, width: int, height: int):
 
         self.pos = pygame.math.Vector2(x, y)
         self.size = pygame.math.Vector2(width, height)
 
         self.active = False
-
-        self.feedback_prompt = feedback_prompt
 
         self.text = ""
         self.commands = self.text.split()
@@ -80,10 +78,10 @@ class CommandPrompt():
 
     def test(self):
         line = FeedbackLine("this will test item consumable and weapon highligting")
-        self.feedback_prompt.feedback_lines.append(line)
+        lib.feedback_prompt.feedback_lines.append(line)
 
     def clear_feedback(self):
-        self.feedback_prompt.reset_prompt()
+        lib.feedback_prompt.reset_prompt()
 
     def check_active(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -115,13 +113,13 @@ class CommandPrompt():
                 self.commands_list[self.commands[0]][2](self.commands[1])
             else:
                 line = FeedbackLine("invalid command")
-                self.feedback_prompt.feedback_lines.append(line)
+                lib.feedback_prompt.feedback_lines.append(line)
         else:
             if self.commands[0] in self.commands_list:
                 self.commands_list[self.commands[0]][2]()
             else:
                 line = FeedbackLine("invalid command")
-                self.feedback_prompt.feedback_lines.append(line)
+                lib.feedback_prompt.feedback_lines.append(line)
         
         self.text = ""
 

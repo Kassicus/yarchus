@@ -42,4 +42,7 @@ events = None
 delta_time = 0
 framerate = 120
 
+feedback_prompt = None
+command_prompt = None
+
 player = None
