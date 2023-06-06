@@ -160,7 +160,6 @@ class CommandPrompt():
             self.commands = self.text.split()
             self.render_commands()
 
-    
 ################
 # ITEM CLASSES #
 ################
@@ -193,7 +192,6 @@ class Player():
 
     def add_to_inventory(self, item: Item):
         self.inventory.append(item)
-
 
 ###################
 # MAIN GAME CLASS #
