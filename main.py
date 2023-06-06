@@ -27,17 +27,11 @@ F_BOLD_ITALIC = pygame.font.Font("assets/fonts/BoldItalic.ttf", 14)
 # KEYWORD LISTS #
 #################
 
-item_keywords = [
-    
-]
+item_keywords = []
 
-consumable_keywords = [
-    
-]
+consumable_keywords = []
 
-weapon_keywords = [
-    
-]
+weapon_keywords = []
     
 dev_keywords = [
     "DEBUG:",
@@ -82,6 +76,8 @@ class FeedbackPrompt():
         self.feedback_lines = []
 
     def draw_feedback(self):
+        self.manage_feedback_lines()
+
         horizontal_offset = 10 + self.pos.x
         vertical_offset = 10 + self.pos.y
         
@@ -95,6 +91,10 @@ class FeedbackPrompt():
                 horizontal_offset += word.get_width() + 8
 
             vertical_offset += 30
+
+    def manage_feedback_lines(self):
+        if len(self.feedback_lines) > 20:
+            self.feedback_lines.pop(0)
 
 class CommandPrompt():
     def __init__(self, x: int, y: int, width: int, height: int):
