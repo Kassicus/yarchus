@@ -6,7 +6,7 @@ pygame.init()
 # CONSTANTS #
 #############
 
-SCREEN_WIDTH = 800
+SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 800
 
 C_BLACK = pygame.Color(0, 0, 0)
@@ -40,7 +40,8 @@ weapon_keywords = [
 ]
     
 dev_keywords = [
-    "DEBUG:"
+    "DEBUG:",
+    "INVALID:"
 ]
     
 ####################
@@ -123,16 +124,26 @@ class CommandPrompt():
     def process_command(self):
         if len(self.commands) > 1:
             if self.commands[0] in game.commands_list:
-                game.commands_list[self.commands[0]][2](self.commands[1])
+                try:
+                    game.commands_list[self.commands[0]][2](self.commands[1])
+                except:
+                    line = FeedbackLine("INVALID: argument")
+                    game.feedback_prompt.feedback_lines.append(line)
             else:
-                line = FeedbackLine("invalid command")
+                line = FeedbackLine("INVALID: command")
                 game.feedback_prompt.feedback_lines.append(line)
+
+                blank_line = FeedbackLine(" ")
+                game.feedback_prompt.feedback_lines.append(blank_line)
         else:
             if self.commands[0] in game.commands_list:
                 game.commands_list[self.commands[0]][2]()
             else:
-                line = FeedbackLine("invalid command")
+                line = FeedbackLine("INVALID: command")
                 game.feedback_prompt.feedback_lines.append(line)
+
+                blank_line = FeedbackLine(" ")
+                game.feedback_prompt.feedback_lines.append(blank_line)
 
         self.text = ""
 
@@ -142,6 +153,12 @@ class CommandPrompt():
         for command in self.commands:
             if command in game.commands_list:
                 rendered_command = F_BOLD_ITALIC.render(command, True, C_COMMAND)
+            elif command in item_keywords:
+                rendered_command = F_BOLD.render(command, True, C_ITEM)
+            elif command in consumable_keywords:
+                rendered_command = F_BOLD.render(command, True, C_CONSUMABLE)
+            elif command in weapon_keywords:
+                rendered_command = F_BOLD.render(command, True, C_WEAPON)
             else:
                 rendered_command = F_REGULAR.render(command, True, C_TEXT)
 
@@ -241,6 +258,9 @@ class Player():
             line = FeedbackLine(item.name)
             game.feedback_prompt.feedback_lines.append(line)
 
+        blank_line = FeedbackLine(" ")
+        game.feedback_prompt.feedback_lines.append(blank_line)
+
 ###################
 # MAIN GAME CLASS #
 ###################
@@ -257,8 +277,8 @@ class Game():
 
         self.player = Player()
 
-        self.feedback_prompt = FeedbackPrompt(50, 50, 700, 500)
-        self.command_prompt = CommandPrompt(50, 600, 700, 50)
+        self.feedback_prompt = FeedbackPrompt(50, 50, 900, 600)
+        self.command_prompt = CommandPrompt(50, 700, 900, 50)
 
         self.commands_list = {
             "admin_add": ["item: Item", "adds the entered item to the player inventory", self.command_admin_add],
@@ -298,6 +318,9 @@ class Game():
             line = FeedbackLine(f"{command} | {self.commands_list[command][0]} | {self.commands_list[command][1]}")
             self.feedback_prompt.feedback_lines.append(line)
 
+        blank_line = FeedbackLine(" ")
+        self.feedback_prompt.feedback_lines.append(blank_line)
+
 
     def command_admin_add(self, keyword: str):
         added_item = None
@@ -318,6 +341,9 @@ class Game():
 
         line = FeedbackLine(f"DEBUG: Added {added_item.name} to player inventory")
         self.feedback_prompt.feedback_lines.append(line)
+
+        blank_line = FeedbackLine(" ")
+        self.feedback_prompt.feedback_lines.append(blank_line)
 
     def command_admin_list(self):
         header_line = FeedbackLine("Items: (name, description)")
@@ -340,6 +366,9 @@ class Game():
         for weapon in weapons_container:
             line = FeedbackLine(f"{weapon.name} , {weapon.description} , {weapon.type} , {weapon.damage}")
             self.feedback_prompt.feedback_lines.append(line)
+
+        blank_line = FeedbackLine(" ")
+        self.feedback_prompt.feedback_lines.append(blank_line)
 
     def draw(self):
         self.screen.fill(C_BLACK)
