@@ -241,6 +241,73 @@ for consumable in consumables_container:
 for weapon in weapons_container:
     weapon_keywords.append(str(weapon.name))
     
+###################
+# CONTAINER CLASS #
+###################
+
+class Container():
+    def __init__(self, name: str, lock_state: str):
+        self.name = name
+
+        self.lock_state = lock_state
+
+        self.items = []
+
+    def search_container(self):
+        if self.lock_state == "unlocked":
+            header_line = FeedbackLine('you find...')
+            game.feedback_prompt.feedback_lines.append(header_line)
+
+            for item in self.items:
+                line = FeedbackLine(f"{item.name}")
+                game.feedback_prompt.feedback_lines.append(line)
+
+        elif self.lock_state == "locked":
+            error_line = FeedbackLine(f" the {self.type} is locked")
+            game.feedback_prompt.feedback_lines.append(error_line)
+
+
+##############    
+# ROOM CLASS #
+##############
+
+class Room():
+    def __init__(self, name: str, description: str, items: list):
+        self.name = name
+        self.description = description
+
+        self.items = items
+        self.containers = []
+        self.doors = []
+
+    def search_room(self):
+        header_line = FeedbackLine("you find...")
+        game.feedback_prompt.feedback_lines.append(header_line)
+
+        for container in self.containers:
+            line = FeedbackLine(f"a {container.name} appears to be {container.lock_state}")
+            game.feedback_prompt.feedback_lines.append(line)
+
+        for items in self.items:
+            line = FeedbackLine(f"a {items.name} on the ground")
+            game.feedback_prompt.feedback_lines.append(line)
+
+    def search_container(self, container_name: str):
+        for container in self.containers:
+            if container.name == container_name:
+                container.search_container()
+
+##################
+# ROOM CONTAINER #
+##################
+
+rooms = {
+    "spawn": Room("Spawn Room", "The room where you spawn... duh", [i_sock])
+}
+
+rooms["spawn"].containers.append(Container("chest", "unlocked"))
+rooms["spawn"].containers[0].items.append(w_knife)
+
 ################
 # PLAYER CLASS #
 ################
@@ -276,6 +343,7 @@ class Game():
         self.events = pygame.event.get()
 
         self.player = Player()
+        self.current_room = rooms["spawn"]
 
         self.feedback_prompt = FeedbackPrompt(50, 50, 900, 600)
         self.command_prompt = CommandPrompt(50, 700, 900, 50)
@@ -285,7 +353,12 @@ class Game():
             "admin_list": ["n/a", "lists all items in the game", self.command_admin_list],
             "help": ["n/a", "displays this prompt", self.command_help],
             "clear": ["n/a", "clears the feedback prompt", self.feedback_prompt.reset_prompt],
-            "inv": ["n/a", "lists the players inventory", self.player.list_inventory]
+            "inv": ["n/a", "lists the players inventory", self.player.list_inventory],
+            "exit": ["n/a", "ends the program", self.command_exit],
+            "whereami": ["n/a", "tells you what room you are in", self.command_whereami],
+            "desc_room": ["n/a", "describes the current room you are in", self.command_desc_room],
+            "search_room": ["n/a", "searches the current room you are in", self.current_room.search_room],
+            "search_container": ["container: Container", "searches the entered container", self.current_room.search_container]
         }
 
     def start(self):
@@ -320,7 +393,6 @@ class Game():
 
         blank_line = FeedbackLine(" ")
         self.feedback_prompt.feedback_lines.append(blank_line)
-
 
     def command_admin_add(self, keyword: str):
         added_item = None
@@ -369,6 +441,17 @@ class Game():
 
         blank_line = FeedbackLine(" ")
         self.feedback_prompt.feedback_lines.append(blank_line)
+
+    def command_exit(self):
+        self.running = False
+
+    def command_whereami(self):
+        line = FeedbackLine(f"you are in {self.current_room.name}")
+        self.feedback_prompt.feedback_lines.append(line)
+
+    def command_desc_room(self):
+        line = FeedbackLine(f"the room you are in is {self.current_room.description}")
+        self.feedback_prompt.feedback_lines.append(line)
 
     def draw(self):
         self.screen.fill(C_BLACK)
