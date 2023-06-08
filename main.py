@@ -262,8 +262,8 @@ class Container():
                 line = FeedbackLine(f"{item.name}")
                 game.feedback_prompt.feedback_lines.append(line)
 
-        elif self.lock_state == "locked":
-            error_line = FeedbackLine(f" the {self.type} is locked")
+        else:
+            error_line = FeedbackLine(f" the {self.name} is locked")
             game.feedback_prompt.feedback_lines.append(error_line)
 
 
@@ -285,7 +285,7 @@ class Room():
         game.feedback_prompt.feedback_lines.append(header_line)
 
         for container in self.containers:
-            line = FeedbackLine(f"a {container.name} appears to be {container.lock_state}")
+            line = FeedbackLine(f"a {container.name} that appears to be {container.lock_state}")
             game.feedback_prompt.feedback_lines.append(line)
 
         for items in self.items:
@@ -306,6 +306,7 @@ rooms = {
 }
 
 rooms["spawn"].containers.append(Container("chest", "unlocked"))
+rooms["spawn"].containers.append(Container("footlocker", "locked"))
 rooms["spawn"].containers[0].items.append(w_knife)
 
 ################
