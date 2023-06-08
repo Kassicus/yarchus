@@ -2,9 +2,13 @@ import pygame
 
 pygame.init()
 
-#############
-# CONSTANTS #
-#############
+"""
+###################################################################################################
+
+CONSTANTS
+
+###################################################################################################
+"""
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 800
@@ -23,9 +27,13 @@ F_BOLD = pygame.font.Font("assets/fonts/Bold.ttf", 14)
 F_ITALIC = pygame.font.Font("assets/fonts/Italic.ttf", 14)
 F_BOLD_ITALIC = pygame.font.Font("assets/fonts/BoldItalic.ttf", 14)
 
-#################
-# KEYWORD LISTS #
-#################
+"""
+###################################################################################################
+
+KEYWORD LISTS
+
+###################################################################################################
+"""
 
 item_keywords = []
 
@@ -38,9 +46,13 @@ dev_keywords = [
     "INVALID:"
 ]
     
-####################
-# TERMINAL CLASSES #
-####################
+"""
+###################################################################################################
+
+TERMINAL CLASSES
+
+###################################################################################################
+"""
 
 class FeedbackLine():
     def __init__(self, text: str):
@@ -183,9 +195,13 @@ class CommandPrompt():
             self.commands = self.text.split()
             self.render_commands()
 
-################
-# ITEM CLASSES #
-################
+"""
+###################################################################################################
+
+ITEM CLASSES
+
+###################################################################################################
+"""
 
 class Item():
     def __init__(self, name: str, description: str):
@@ -204,9 +220,13 @@ class Weapon(Item):
         self.damage = damage
         self.durability = durability
 
-#########
-# ITEMS #
-#########
+"""
+###################################################################################################
+
+ITEMS
+
+###################################################################################################
+"""
 
 i_sock = Item("Sock", "A Random Sock")
 
@@ -215,9 +235,13 @@ c_milk = Consumable("Milk", "Some questionable bottled dairy")
 w_knife = Weapon("Knife", "A rusty butterknife", "melee", 3, 65)
 w_wrench = Weapon("Wrench", "A shiny cresent wrench", "melee", 1, 100)
 
-###################
-# ITEM CONTAINERS #
-###################
+"""
+###################################################################################################
+
+ITEM CONTAINERS
+
+###################################################################################################
+"""
 
 items_container = [
     i_sock
@@ -241,9 +265,13 @@ for consumable in consumables_container:
 for weapon in weapons_container:
     weapon_keywords.append(str(weapon.name))
     
-###################
-# CONTAINER CLASS #
-###################
+"""
+###################################################################################################
+
+CONTAINER CLASS
+
+###################################################################################################
+"""
 
 class Container():
     def __init__(self, name: str, lock_state: str):
@@ -267,9 +295,13 @@ class Container():
             game.feedback_prompt.feedback_lines.append(error_line)
 
 
-##############    
-# ROOM CLASS #
-##############
+"""
+###################################################################################################
+
+ROOM CLASS
+
+###################################################################################################
+"""
 
 class Room():
     def __init__(self, name: str, description: str, items: list):
@@ -297,9 +329,13 @@ class Room():
             if container.name == container_name:
                 container.search_container()
 
-##################
-# ROOM CONTAINER #
-##################
+"""
+###################################################################################################
+
+ROOM CONTAINER
+
+###################################################################################################
+"""
 
 rooms = {
     "spawn": Room("Spawn Room", "The room where you spawn... duh", [i_sock])
@@ -309,9 +345,13 @@ rooms["spawn"].containers.append(Container("chest", "unlocked"))
 rooms["spawn"].containers.append(Container("footlocker", "locked"))
 rooms["spawn"].containers[0].items.append(w_knife)
 
-################
-# PLAYER CLASS #
-################
+"""
+###################################################################################################
+
+PLAYER CLASS
+
+###################################################################################################
+"""
 
 class Player():
     def __init__(self):
@@ -329,9 +369,13 @@ class Player():
         blank_line = FeedbackLine(" ")
         game.feedback_prompt.feedback_lines.append(blank_line)
 
-###################
-# MAIN GAME CLASS #
-###################
+"""
+###################################################################################################
+
+MAIN GAME CLASS
+
+###################################################################################################
+"""
 
 class Game():
     def __init__(self):
@@ -465,6 +509,14 @@ class Game():
 
         pygame.display.update()
         self.delta_time = self.clock.tick(120) / 1000
+
+"""
+###################################################################################################
+
+LAUNCH GAME
+
+###################################################################################################
+"""
 
 if __name__ == '__main__':
     game = Game()
