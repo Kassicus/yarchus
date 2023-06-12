@@ -286,10 +286,13 @@ class Container():
             header_line = FeedbackLine('you find...')
             game.feedback_prompt.feedback_lines.append(header_line)
 
-            for item in self.items:
-                line = FeedbackLine(f"{item.name}")
-                game.feedback_prompt.feedback_lines.append(line)
-
+            if len(self.items) > 0:
+                for item in self.items:
+                    line = FeedbackLine(f"{item.name}")
+                    game.feedback_prompt.feedback_lines.append(line)
+            else:
+                blank_line = FeedbackLine(" ")
+                game.feedback_prompt.feedback_lines.append(blank_line)
         else:
             error_line = FeedbackLine(f" the {self.name} is locked")
             game.feedback_prompt.feedback_lines.append(error_line)
@@ -312,6 +315,26 @@ class Room():
         self.containers = []
         self.doors = []
 
+    def pickup(self, item_name: str):
+        for item in self.items:
+            if item.name == item_name:
+                game.player.add_to_inventory(item)
+                line = FeedbackLine(f"you picked up {item.name}")
+                game.feedback_prompt.feedback_lines.append(line)
+                self.items.remove(item)
+
+        for container in self.containers:
+            if container.lock_state == "unlocked":
+                for item in container.items:
+                    if item.name == item_name:
+                        game.player.add_to_inventory(item)
+                        line = FeedbackLine(f"you picked up {item.name}")
+                        game.feedback_prompt.feedback_lines.append(line)
+                        container.items.remove(item)
+
+        blank_line = FeedbackLine(" ")
+        game.feedback_prompt.feedback_lines.append(blank_line)
+
     def search_room(self):
         header_line = FeedbackLine("you find...")
         game.feedback_prompt.feedback_lines.append(header_line)
@@ -323,6 +346,9 @@ class Room():
         for items in self.items:
             line = FeedbackLine(f"a {items.name} on the ground")
             game.feedback_prompt.feedback_lines.append(line)
+
+        blank_line = FeedbackLine(" ")
+        game.feedback_prompt.feedback_lines.append(blank_line)
 
     def search_container(self, container_name: str):
         for container in self.containers:
@@ -361,13 +387,20 @@ class Player():
     def add_to_inventory(self, item: Item):
         self.inventory.append(item)
 
-    def list_inventory(self):
-        for item in self.inventory:
-            line = FeedbackLine(item.name)
-            game.feedback_prompt.feedback_lines.append(line)
-
         blank_line = FeedbackLine(" ")
         game.feedback_prompt.feedback_lines.append(blank_line)
+
+    def list_inventory(self):
+        header_line = FeedbackLine("your inventory contains...")
+        game.feedback_prompt.feedback_lines.append(header_line)
+
+        if len(self.inventory) > 0:
+            for item in self.inventory:
+                line = FeedbackLine(item.name)
+                game.feedback_prompt.feedback_lines.append(line)
+        else:
+            blank_line = FeedbackLine(" ")
+            game.feedback_prompt.feedback_lines.append(blank_line)
 
 """
 ###################################################################################################
@@ -403,7 +436,8 @@ class Game():
             "whereami": ["n/a", "tells you what room you are in", self.command_whereami],
             "desc_room": ["n/a", "describes the current room you are in", self.command_desc_room],
             "search_room": ["n/a", "searches the current room you are in", self.current_room.search_room],
-            "search_container": ["container: Container", "searches the entered container", self.current_room.search_container]
+            "search_container": ["container: Container", "searches the entered container", self.current_room.search_container],
+            "pickup": ["item: Item", "picks up the entered item", self.current_room.pickup]
         }
 
     def start(self):
@@ -494,9 +528,15 @@ class Game():
         line = FeedbackLine(f"you are in {self.current_room.name}")
         self.feedback_prompt.feedback_lines.append(line)
 
+        blank_line = FeedbackLine(" ")
+        self.feedback_prompt.feedback_lines.append(blank_line)
+
     def command_desc_room(self):
         line = FeedbackLine(f"the room you are in is {self.current_room.description}")
         self.feedback_prompt.feedback_lines.append(line)
+
+        blank_line = FeedbackLine(" ")
+        self.feedback_prompt.feedback_lines.append(blank_line)
 
     def draw(self):
         self.screen.fill(C_BLACK)
