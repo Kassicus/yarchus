@@ -1,7 +1,8 @@
 # Project Yarchus
 
-Project Yarchus is a pure python text based dungeon crawler designed to be played in the terminal.
+Project Yarchus is a pure python emulated text based dungeon crawler. Originally desgined to be played naitively in the terminal, the desire for certain abilities related to realtime coloring of input led to the use of pygame and simulating a terminal environment.
 
 ## Dependancies
 
-TermColor v2.3.0
+PyGame 2.1.3
+Python 3.11.x
