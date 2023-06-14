@@ -268,15 +268,26 @@ class Item():
 
 # these are specifically items that can be consumed by the player, think food or potions
 class Consumable(Item):
-    def __init__(self, name: str, description: str) -> Item:
+    def __init__(self, name: str, description: str, attr: str, change: int) -> Item:
         """ the base consumable, extensds the item
         
         arguments:
         name: str - the name of the consumable
         description: str - the description of the consumable
+        att: str - the attribute that the consumable effects
+        change: int - the amount that consuming the item effects the attribute
         """
 
         super().__init__(name, description)
+
+        self.attr = attr
+        self.change = change
+
+    # effect the target attribute
+    def consume(self) -> None:
+        if self.attr == "health":
+            game.player.health += self.change
+
 
 # these are specifically items that do damage
 class Weapon(Item):
@@ -308,7 +319,8 @@ ITEMS
 # prefix items with an i for Item, c for Consumable and w for Weapon
 i_sock = Item("Sock", "A Random Sock")
 
-c_milk = Consumable("Milk", "Some questionable bottled dairy")
+c_milk = Consumable("Milk", "Some questionable bottled dairy", "health", -1)
+c_health_potion = Consumable("HealthPotion", "A potion that restores health", "health", 10)
 
 w_knife = Weapon("Knife", "A rusty butterknife", "melee", 3, 65)
 w_wrench = Weapon("Wrench", "A shiny cresent wrench", "melee", 1, 100)
@@ -328,7 +340,8 @@ items_container = [
 
 # manually adding all consumables to this master container, these are not accessible to the player directly    
 consumables_container = [
-    c_milk
+    c_milk,
+    c_health_potion
 ]
     
 # manually adding all weapons to this master container, these are not accessible to the player directly    
@@ -499,6 +512,7 @@ class Player():
 
         self.inventory = []
         self.health = 10
+        self.max_health = 30
 
     # add an item to inventory, this requires the actual Item type not a string
     def add_to_inventory(self, item: Item) -> None:
@@ -521,6 +535,19 @@ class Player():
             # otherwise draw a blank line for cleanliness
             blank_line = FeedbackLine(" ")
             game.feedback_prompt.feedback_lines.append(blank_line)
+
+    # show the players vitals
+    def vitals(self) -> None:
+        # display the players current health
+        health_line = FeedbackLine(f"health {self.health} / {self.max_health}")
+        game.feedback_prompt.feedback_lines.append(health_line)
+
+    # determine if the item is consumable, consume it and remove it
+    def consume_item(self, item_name: str) -> None:
+        for item in self.inventory:
+            if item.name == item_name:
+                item.consume()
+                self.inventory.remove(item)
 
 """
 ###################################################################################################
@@ -560,7 +587,9 @@ class Game():
             "desc_room": ["n/a", "describes the current room you are in", self.command_desc_room],
             "search_room": ["n/a", "searches the current room you are in", self.current_room.search_room],
             "search_container": ["container: Container", "searches the entered container", self.current_room.search_container],
-            "pickup": ["item: Item", "picks up the entered item", self.current_room.pickup]
+            "pickup": ["item: Item", "picks up the entered item", self.current_room.pickup],
+            "cons": ["item: Item", "consumes the entered item", self.player.consume_item],
+            "vitals": ["n/a", "check the players vitals", self.player.vitals]
         }
 
     def start(self) -> None:
