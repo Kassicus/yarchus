@@ -68,6 +68,8 @@ class FeedbackLine():
         self.line = [] # this is the important thing, we draw the words directly out of these containers
         self.parse_words()
 
+        game.feedback_prompt.feedback_lines.append(self)
+
     # this applies highlighting and font weight to words if they appear in the keyword lists
     def parse_words(self) -> None:
         for word in self.words:
@@ -181,16 +183,13 @@ class CommandPrompt():
                 except:
                     # if for whatever reason this fails, let the user know that they have an invalid argument
                     # this wont catch everything, but it allows the user to fix the problem
-                    line = FeedbackLine("INVALID: argument")
-                    game.feedback_prompt.feedback_lines.append(line)
+                    FeedbackLine("INVALID: argument")
             else:
                 # if the command isnt present, let the user know. (commands also get highlighted in real time, they should notice if they have it wrong)
-                line = FeedbackLine("INVALID: command")
-                game.feedback_prompt.feedback_lines.append(line)
-
-                blank_line = FeedbackLine(" ")
-                game.feedback_prompt.feedback_lines.append(blank_line)
-
+                FeedbackLine("INVALID: command")
+                
+                FeedbackLine(" ")
+                
         elif len(self.commands) == 2:
             if self.commands[0] in game.commands_list: # check if the first command is present in our command list
                 try:
@@ -199,25 +198,21 @@ class CommandPrompt():
                     # if for whatever reason this fails, let the user know that they have an invalid argument
                     # this wont catch everything, but it allows the user to fix the problem
                     # TODO: make this more granular, figure out what the error is and give better feedback to the player
-                    line = FeedbackLine("INVALID: argument")
-                    game.feedback_prompt.feedback_lines.append(line)
+                    FeedbackLine("INVALID: argument")
+                    
             else:
                 # if the command isnt present, let the user know. (commands also get highlighted in real time, they should notice if they have it wrong)
-                line = FeedbackLine("INVALID: command")
-                game.feedback_prompt.feedback_lines.append(line)
+                FeedbackLine("INVALID: command")
 
-                blank_line = FeedbackLine(" ")
-                game.feedback_prompt.feedback_lines.append(blank_line)
+                FeedbackLine(" ")
         else: # this is now running commands that don't have arguments present, much simpler here
             if self.commands[0] in game.commands_list:
                 game.commands_list[self.commands[0]][2]()
             else:
                 # same as before, if the command doesnt match, we let the user know
-                line = FeedbackLine("INVALID: command")
-                game.feedback_prompt.feedback_lines.append(line)
+                FeedbackLine("INVALID: command")
 
-                blank_line = FeedbackLine(" ")
-                game.feedback_prompt.feedback_lines.append(blank_line)
+                FeedbackLine(" ")
 
         self.text = "" # after the command has been processed, reset the text in the command prompt
 
@@ -410,33 +405,26 @@ class Container():
     def search_container(self) -> None:
         # if the container is unlocked, we print all of the items present in the container
         if self.lock_state == "unlocked":
-            header_line = FeedbackLine('you find...')
-            game.feedback_prompt.feedback_lines.append(header_line)
+            FeedbackLine('you find...')
 
             if len(self.items) > 0:
                 for item in self.items:
-                    line = FeedbackLine(f"{item.name}")
-                    game.feedback_prompt.feedback_lines.append(line)
+                    FeedbackLine(f"{item.name}")
             # if the container is empty we just print this blank line
             else:
-                blank_line = FeedbackLine(" ")
-                game.feedback_prompt.feedback_lines.append(blank_line)
+                FeedbackLine(" ")
         # if the container is locked we let the user know that the container is unlocked
         else:
-            error_line = FeedbackLine(f" the {self.name} is locked")
-            game.feedback_prompt.feedback_lines.append(error_line)
+            FeedbackLine(f" the {self.name} is locked")
 
     # handle unlocking the container
     def unlock(self, item_name: str) -> None:
         if self.lock_state == "locked":
             if item_name == "Lockpick":
                 self.lock_state = "unlocked"
-                success = FeedbackLine(f"successfully unlocked {self.name}")
-                game.feedback_prompt.feedback_lines.append(success)
+                FeedbackLine(f"successfully unlocked {self.name}")
         else:
-            line = FeedbackLine("this container is already unlocked")
-            game.feedback_prompt.feedback_lines.append(line)
-
+            FeedbackLine("this container is already unlocked")
 
 """
 ###################################################################################################
@@ -468,8 +456,7 @@ class Room():
         for item in self.items:
             if item.name == item_name: # we just match the items name with the string that was given, if there is no match we do nothing
                 game.player.add_to_inventory(item)
-                line = FeedbackLine(f"you picked up {item.name}")
-                game.feedback_prompt.feedback_lines.append(line)
+                FeedbackLine(f"you picked up {item.name}")
                 self.items.remove(item)
 
         for container in self.containers:
@@ -477,32 +464,26 @@ class Room():
                 for item in container.items: # same logic as above, just for the items in each container
                     if item.name == item_name:
                         game.player.add_to_inventory(item)
-                        line = FeedbackLine(f"you picked up {item.name}")
-                        game.feedback_prompt.feedback_lines.append(line)
+                        FeedbackLine(f"you picked up {item.name}")
                         container.items.remove(item)
 
         # blank line for cleanliness
-        blank_line = FeedbackLine(" ")
-        game.feedback_prompt.feedback_lines.append(blank_line)
+        FeedbackLine(" ")
 
     # shows all of the floor items as well as all of the containers and their states
     def search_room(self):
-        header_line = FeedbackLine("you find...")
-        game.feedback_prompt.feedback_lines.append(header_line)
+        FeedbackLine("you find...")
 
         # show the state of all containers
         for container in self.containers:
-            line = FeedbackLine(f"a {container.name} that appears to be {container.lock_state}")
-            game.feedback_prompt.feedback_lines.append(line)
+            FeedbackLine(f"a {container.name} that appears to be {container.lock_state}")
 
         # list all items on the floor
         for items in self.items:
-            line = FeedbackLine(f"a {items.name} on the ground")
-            game.feedback_prompt.feedback_lines.append(line)
+            FeedbackLine(f"a {items.name} on the ground")
 
         # blank line for cleanliness
-        blank_line = FeedbackLine(" ")
-        game.feedback_prompt.feedback_lines.append(blank_line)
+        FeedbackLine(" ")
 
     # search an individual container
     def search_container(self, container_name: str):
@@ -555,28 +536,23 @@ class Player():
         self.inventory.append(item)
 
         # blank line for cleanliness
-        blank_line = FeedbackLine(" ")
-        game.feedback_prompt.feedback_lines.append(blank_line)
+        FeedbackLine(" ")
 
     def list_inventory(self) -> None:
-        header_line = FeedbackLine("your inventory contains...")
-        game.feedback_prompt.feedback_lines.append(header_line)
+        FeedbackLine("your inventory contains...")
 
         # if there is anything in the inventory, then print each inventory item on its own line
         if len(self.inventory) > 0:
             for item in self.inventory:
-                line = FeedbackLine(item.name)
-                game.feedback_prompt.feedback_lines.append(line)
+                FeedbackLine(item.name)
         else:
             # otherwise draw a blank line for cleanliness
-            blank_line = FeedbackLine(" ")
-            game.feedback_prompt.feedback_lines.append(blank_line)
+            FeedbackLine(" ")
 
     # show the players vitals
     def vitals(self) -> None:
         # display the players current health
-        health_line = FeedbackLine(f"health {self.health} / {self.max_health}")
-        game.feedback_prompt.feedback_lines.append(health_line)
+        FeedbackLine(f"health {self.health} / {self.max_health}")
 
     # determine if the item is consumable, consume it and remove it
     def consume_item(self, item_name: str) -> None:
@@ -659,17 +635,14 @@ class Game():
     # prints all of the commands to the feedback prompt
     def command_help(self) -> None:
         # loose structure description in header line
-        header_line = FeedbackLine("Command | Arguments | Description")
-        self.feedback_prompt.feedback_lines.append(header_line)
+        FeedbackLine("Command | Arguments | Description")
 
         # create the feedback line from each command entry in the commands dict
         for command in self.commands_list:
-            line = FeedbackLine(f"{command} | {self.commands_list[command][0]} | {self.commands_list[command][1]}")
-            self.feedback_prompt.feedback_lines.append(line)
+            FeedbackLine(f"{command} | {self.commands_list[command][0]} | {self.commands_list[command][1]}")
 
         # blank line for cleanliness
-        blank_line = FeedbackLine(" ")
-        self.feedback_prompt.feedback_lines.append(blank_line)
+        FeedbackLine(" ")
 
     # adds any item as long as it exists
     def command_admin_add(self, keyword: str) -> None:
@@ -695,46 +668,37 @@ class Game():
         self.player.add_to_inventory(added_item)
 
         # create the feedback line that we added the item
-        line = FeedbackLine(f"DEBUG: Added {added_item.name} to player inventory")
-        self.feedback_prompt.feedback_lines.append(line)
+        FeedbackLine(f"DEBUG: Added {added_item.name} to player inventory")
 
         # blank line for cleanliness
-        blank_line = FeedbackLine(" ")
-        self.feedback_prompt.feedback_lines.append(blank_line)
+        FeedbackLine(" ")
 
     # list all items in the game that can be added with the admin command
     # TODO: create a grid layout version for this or we will run out of space with only having 20 lines. We might need to make things scrollable?
     def command_admin_list(self) -> None:
         # header line to break up categories
-        header_line = FeedbackLine("Items: (name, description)")
-        self.feedback_prompt.feedback_lines.append(header_line)
+        FeedbackLine("Items: (name, description)")
 
         # loop through items and add all items
         for item in items_container:
-            line = FeedbackLine(f"{item.name} , {item.description}")
-            self.feedback_prompt.feedback_lines.append(line)
+            FeedbackLine(f"{item.name} , {item.description}")
 
         # header line to break up categories
-        header_line = FeedbackLine("Consumables: (name, description)")
-        self.feedback_prompt.feedback_lines.append(header_line)
+        FeedbackLine("Consumables: (name, description)")
         
         # loop through all consumables
         for consumable in consumables_container:
-            line = FeedbackLine(f"{consumable.name} , {consumable.description}")
-            self.feedback_prompt.feedback_lines.append(line)
+            FeedbackLine(f"{consumable.name} , {consumable.description}")
 
         # header line to break up weapons
-        header_line = FeedbackLine("Weapons: (name, description, type, damage)")
-        self.feedback_prompt.feedback_lines.append(header_line)
+        FeedbackLine("Weapons: (name, description, type, damage)")
         
         # loop through all the weapons
         for weapon in weapons_container:
-            line = FeedbackLine(f"{weapon.name} , {weapon.description} , {weapon.type} , {weapon.damage}")
-            self.feedback_prompt.feedback_lines.append(line)
+            FeedbackLine(f"{weapon.name} , {weapon.description} , {weapon.type} , {weapon.damage}")
 
         # blank line for cleanliness
-        blank_line = FeedbackLine(" ")
-        self.feedback_prompt.feedback_lines.append(blank_line)
+        FeedbackLine(" ")
 
     # kills the program
     def command_exit(self) -> None:
@@ -742,21 +706,17 @@ class Game():
 
     # tells the player what room they are in
     def command_whereami(self) -> None:
-        line = FeedbackLine(f"you are in {self.current_room.name}")
-        self.feedback_prompt.feedback_lines.append(line)
+        FeedbackLine(f"you are in {self.current_room.name}")
 
         # break line for cleanliness
-        blank_line = FeedbackLine(" ")
-        self.feedback_prompt.feedback_lines.append(blank_line)
+        FeedbackLine(" ")
 
     # describes the room the player is in
     def command_desc_room(self) -> None:
-        line = FeedbackLine(f"the room you are in is {self.current_room.description}")
-        self.feedback_prompt.feedback_lines.append(line)
+        FeedbackLine(f"the room you are in is {self.current_room.description}")
 
         # blank line for cleanliness
-        blank_line = FeedbackLine(" ")
-        self.feedback_prompt.feedback_lines.append(blank_line)
+        FeedbackLine(" ")
 
     # draws everything, which isnt that much
     def draw(self):
