@@ -173,7 +173,25 @@ class CommandPrompt():
     # this whole function is a mess, but it works and thats what matters
     def process_command(self) -> None:
         # if we have more than one 'command' present (more than one word)
-        if len(self.commands) > 1:
+        
+        if len(self.commands) == 3:
+            if self.commands[0] in game.commands_list: # check if the first command is present in our command list
+                try:
+                    game.commands_list[self.commands[0]][2](self.commands[1], self.commands[2]) # if it is, try to pass the second command as an argument
+                except:
+                    # if for whatever reason this fails, let the user know that they have an invalid argument
+                    # this wont catch everything, but it allows the user to fix the problem
+                    line = FeedbackLine("INVALID: argument")
+                    game.feedback_prompt.feedback_lines.append(line)
+            else:
+                # if the command isnt present, let the user know. (commands also get highlighted in real time, they should notice if they have it wrong)
+                line = FeedbackLine("INVALID: command")
+                game.feedback_prompt.feedback_lines.append(line)
+
+                blank_line = FeedbackLine(" ")
+                game.feedback_prompt.feedback_lines.append(blank_line)
+
+        elif len(self.commands) == 2:
             if self.commands[0] in game.commands_list: # check if the first command is present in our command list
                 try:
                     game.commands_list[self.commands[0]][2](self.commands[1]) # if it is, try to pass the second command as an argument
@@ -318,6 +336,7 @@ ITEMS
 
 # prefix items with an i for Item, c for Consumable and w for Weapon
 i_sock = Item("Sock", "A Random Sock")
+i_lockpick = Item("Lockpick", "A sturdy set of lockpics")
 
 c_milk = Consumable("Milk", "Some questionable bottled dairy", "health", -1)
 c_health_potion = Consumable("HealthPotion", "A potion that restores health", "health", 10)
@@ -335,7 +354,8 @@ ITEM CONTAINERS
 
 # manually adding all items to this master container, these are not accessible to the player directly
 items_container = [
-    i_sock
+    i_sock,
+    i_lockpick
 ]
 
 # manually adding all consumables to this master container, these are not accessible to the player directly    
@@ -405,6 +425,17 @@ class Container():
         else:
             error_line = FeedbackLine(f" the {self.name} is locked")
             game.feedback_prompt.feedback_lines.append(error_line)
+
+    # handle unlocking the container
+    def unlock(self, item_name: str) -> None:
+        if self.lock_state == "locked":
+            if item_name == "Lockpick":
+                self.lock_state = "unlocked"
+                success = FeedbackLine(f"successfully unlocked {self.name}")
+                game.feedback_prompt.feedback_lines.append(success)
+        else:
+            line = FeedbackLine("this container is already unlocked")
+            game.feedback_prompt.feedback_lines.append(line)
 
 
 """
@@ -478,6 +509,11 @@ class Room():
         for container in self.containers:
             if container.name == container_name:
                 container.search_container()
+
+    def unlock_container(self, container_name: str, item_name: str):
+        for container in self.containers:
+            if container.name == container_name:
+                container.unlock(item_name)
 
 """
 ###################################################################################################
@@ -589,7 +625,8 @@ class Game():
             "search_container": ["container: Container", "searches the entered container", self.current_room.search_container],
             "pickup": ["item: Item", "picks up the entered item", self.current_room.pickup],
             "cons": ["item: Item", "consumes the entered item", self.player.consume_item],
-            "vitals": ["n/a", "check the players vitals", self.player.vitals]
+            "vitals": ["n/a", "check the players vitals", self.player.vitals],
+            "unlock": ["cont: Container, item: Item", "unlockes the entered container with the entered item", self.current_room.unlock_container]
         }
 
     def start(self) -> None:
